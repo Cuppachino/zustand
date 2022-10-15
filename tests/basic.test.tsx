@@ -22,11 +22,11 @@ it('creates a store hook and api object', () => {
     return { value: null }
   })
   expect({ params, result }).toMatchInlineSnapshot(`
-    Object {
-      "params": Array [
+    {
+      "params": [
         [Function],
         [Function],
-        Object {
+        {
           "destroy": [Function],
           "getState": [Function],
           "setState": [Function],
@@ -435,6 +435,17 @@ it('can set the store', () => {
   expect(getState().value).toBe(4)
   getState().setState2((s) => ({ value: ++s.value }))
   expect(getState().value).toBe(5)
+})
+
+it('both NaN should not update', () => {
+  const { setState, subscribe } = create<number>(() => NaN)
+
+  const fn = jest.fn()
+  subscribe(fn)
+
+  setState(NaN)
+
+  expect(fn).not.toBeCalled()
 })
 
 it('can set the store without merging', () => {

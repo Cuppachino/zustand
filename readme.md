@@ -12,7 +12,7 @@ A small, fast and scalable bearbones state-management solution using simplified 
 
 Don't disregard it because it's cute. It has quite the claws, lots of time was spent to deal with common pitfalls, like the dreaded [zombie child problem](https://react-redux.js.org/api/hooks#stale-props-and-zombie-children), [react concurrency](https://github.com/bvaughn/rfcs/blob/useMutableSource/text/0000-use-mutable-source.md), and [context loss](https://github.com/facebook/react/issues/13332) between mixed renderers. It may be the one state-manager in the React space that gets all of these right.
 
-You can try a live demo [here](https://githubbox.com/pmndrs/zustand/tree/main/examples).
+You can try a live demo [here](https://githubbox.com/pmndrs/zustand/tree/main/examples/demo).
 
 ```bash
 npm install zustand # or yarn add zustand
@@ -277,7 +277,7 @@ const clearForest = useLushStore((state) => state.clearForest)
 clearForest()
 ```
 
-[Alternatively, there are some other solutions.](./docs/guides/updating-nested-state-object-values.md)
+[Alternatively, there are some other solutions.](./docs/guides/updating-state.md#with-immer)
 
 ## Middleware
 
@@ -370,7 +370,7 @@ const dispatch = useGrumpyStore((state) => state.dispatch)
 dispatch({ type: types.increase, by: 2 })
 ```
 
-Or, just use our redux-middleware. It wires up your main-reducer, sets initial state, and adds a dispatch function to the state itself and the vanilla api. Try [this](https://codesandbox.io/s/amazing-kepler-swxol) example.
+Or, just use our redux-middleware. It wires up your main-reducer, sets initial state, and adds a dispatch function to the state itself and the vanilla api.
 
 ```jsx
 import { redux } from 'zustand/middleware'
@@ -428,6 +428,12 @@ If an action type is not provided, it is defaulted to "anonymous". You can custo
 
 ```jsx
 devtools(..., { anonymousActionType: 'unknown', ... })
+```
+
+If you wish to disable devtools (on production for instance). You can customize this setting by providing the `enabled` parameter:
+
+```jsx
+devtools(..., { enabled: false, ... })
 ```
 
 ## React context
@@ -490,7 +496,7 @@ A more complete TypeScript guide is [here](docs/guides/typescript.md).
 
 ## Best practices
 
-- You may wonder how to organize your code for better maintenance: [Splitting the store into separate slices](./docs/guides/typescript.md#slices-pattern).
+- You may wonder how to organize your code for better maintenance: [Splitting the store into separate slices](./docs/guides/slices-pattern.md).
 - Recommended usage for this unopinionated library: [Flux inspired practice](./docs/guides/flux-inspired-practice.md).
 - [Calling actions outside a React event handler in pre React 18](./docs/guides/event-handler-in-pre-react-18.md).
 - [Testing](./docs/guides/testing.mdx)

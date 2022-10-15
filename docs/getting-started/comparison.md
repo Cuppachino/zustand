@@ -15,8 +15,9 @@ differences and similarities between each.
 
 ### State Model
 
-There are no big differences between Zustand and Redux. Both are based on
-immutable state model. Also, Redux needs to wrap your app in context providers.
+Conceptually, Zustand and Redux are quite similar, both are based on an
+immutable state model. However, Redux, requires your app to be wrapped in
+context providers; Zustand does not.
 
 ```ts
 import create from 'zustand'
@@ -106,8 +107,8 @@ const countSlice = createSlice({
   initialState: { value: 0 },
   reducers: {
     incremented: (state, qty: number) => {
-      // Redux Toolkit does not mutate the state, it use Immer library behind
-      // scenes allow us to have something called "draft state".
+      // Redux Toolkit does not mutate the state, it uses the Immer library
+      // behind scenes, allowing us to have something called "draft state".
       state.value += qty
     },
     decremented: (state, qty: number) => {
@@ -124,6 +125,8 @@ const countStore = configureStore({ reducer: countSlice.reducer })
 When it comes to render optimizations within your app, there are no major
 differences in approach between Zustand and Redux. In both libraries it is
 recommended that you manually apply render optimizations by using selectors.
+
+**Zustand**
 
 ```ts
 import create from 'zustand'
@@ -150,6 +153,8 @@ const Component = () => {
   // ...
 }
 ```
+
+**Redux**
 
 ```ts
 import { createStore } from 'redux'
@@ -194,8 +199,8 @@ const countSlice = createSlice({
   initialState: { value: 0 },
   reducers: {
     incremented: (state, qty: number) => {
-      // Redux Toolkit does not mutate the state, it use Immer library behind
-      // scenes allow us to have something called "draft state".
+      // Redux Toolkit does not mutate the state, it uses the Immer library
+      // behind scenes, allowing us to have something called "draft state".
       state.value += qty
     },
     decremented: (state, qty: number) => {
@@ -222,16 +227,25 @@ const Component = () => {
 
 ### State Model
 
-There is a major difference between Zustand and Valtio. Zustand is based on
-the immutable state model, while Valtio is based on the mutable state model.
+Zustand and Valtio approach state management in a fundamentally different way.
+Zustand is based on the **immutable** state model, while Valtio is based on the
+**mutable** state model.
+
+**Zustand**
 
 ```ts
 import create from 'zustand'
 
-const store = create(() => ({ obj: { count: 0 } }))
+type State = {
+  obj: { count: number }
+}
+
+const store = create<State>(() => ({ obj: { count: 0 } }))
 
 store.setState((prev) => ({ obj: { count: prev.obj.count + 1 } })
 ```
+
+**Valtio**
 
 ```ts
 import { proxy } from 'valtio'
@@ -244,13 +258,19 @@ state.obj.count += 1
 ### Render Optimization
 
 The other difference between Zustand and Valtio is Valtio makes render
-optimizations through property access. While Zustand it is recommended that you
-manually apply render optimizations by using selectors.
+optimizations through property access. However, with Zustand, it is recommended
+that you manually apply render optimizations by using selectors.
+
+**Zustand**
 
 ```ts
 import create from 'zustand'
 
-const useCountStore = create(() => ({
+type State = {
+  count: number
+}
+
+const useCountStore = create<State>(() => ({
   count: 0,
 }))
 
@@ -259,6 +279,8 @@ const Component = () => {
   // ...
 }
 ```
+
+**Valtio**
 
 ```ts
 import { proxy, useSnapshot } from 'valtio'
@@ -277,11 +299,12 @@ const Component = () => {
 
 ### State Model
 
-There are two major differences between Zustand and Jotai. The first one is
-Zustand is a single store, while Jotai consists of primitive atoms and allows
-composing them together. The last one is Zustand store is global in memory, but
-Jotai atoms are not (are definitions that do not hold values) and that's why
-you can not use it outside React.
+There are two major differences between Zustand and Jotai. Firstly, Zustand is a
+single store, while Jotai consists of primitive atoms that can be composed
+together. Secondly, a Zustand store is an external store, making it more
+suitable when access outside of React is required.
+
+**Zustand**
 
 ```ts
 import create from 'zustand'
@@ -290,12 +313,20 @@ type State = {
   count: number
 }
 
-const useCountStore = create<State>((set) => ({
+type Actions = {
+  updateCount: (
+    countCallback: (count: State['count']) => State['count']
+  ) => void
+}
+
+const useCountStore = create<State & Actions>((set) => ({
   count: 0,
-  updateCount: (countCallback: (count: State['count']) => State['count']) =>
+  updateCount: (countCallback) =>
     set((state) => ({ count: countCallback(state.count) })),
 }))
 ```
+
+**Jotai**
 
 ```ts
 import { atom } from 'jotai'
@@ -305,9 +336,11 @@ const countAtom = atom<number>(0)
 
 ### Render Optimization
 
-The other difference between Zustand and Jotai is: Jotai makes render
-optimizations through atom dependency. But, with Zustand you need to do manual
-render optimizations through selectors.
+Jotai achieves render optimizations through atom dependency. However, with
+Zustand it is recommended that you manually apply render optimizations by using
+selectors.
+
+**Zustand**
 
 ```ts
 import create from 'zustand'
@@ -316,9 +349,15 @@ type State = {
   count: number
 }
 
-const useCountStore = create<State>((set) => ({
+type Actions = {
+  updateCount: (
+    countCallback: (count: State['count']) => State['count']
+  ) => void
+}
+
+const useCountStore = create<State & Actions>((set) => ({
   count: 0,
-  updateCount: (countCallback: (count: State['count']) => State['count']) =>
+  updateCount: (countCallback) =>
     set((state) => ({ count: countCallback(state.count) })),
 }))
 
@@ -328,6 +367,8 @@ const Component = () => {
   // ...
 }
 ```
+
+**Jotai**
 
 ```ts
 import { atom, useAtom } from 'jotai'
@@ -344,9 +385,11 @@ const Component = () => {
 
 ### State Model
 
-The major difference is the same as Zustand and Jotai is: Recoil depends on
-atom string keys instead of atom object referential identities. Also, Recoil
-needs to wrap your app in a context provider.
+The difference between Zustand and Recoil is similar to that between Zustand and
+Jotai. Recoil depends on atom string keys instead of atom object referential
+identities, additionally, Recoil needs to wrap your app in a context provider.
+
+**Zustand**
 
 ```ts
 import create from 'zustand'
@@ -355,12 +398,18 @@ type State = {
   count: number
 }
 
-const useCountStore = create<State>((set) => ({
+type Actions = {
+  setCount: (countCallback: (count: State['count']) => State['count']) => void
+}
+
+const useCountStore = create<State & Actions>((set) => ({
   count: 0,
-  setCount: (countCallback: (count: State['count']) => State['count']) =>
+  setCount: (countCallback) =>
     set((state) => ({ count: countCallback(state.count) })),
 }))
 ```
+
+**Recoil**
 
 ```ts
 import { atom } from 'recoil'
@@ -373,9 +422,11 @@ const count = atom({
 
 ### Render Optimization
 
-The other difference between Zustand and Recoil is: Recoil makes render
-optimizations through atom dependency. But, with Zustand you need to do manual
-render optimizations through selectors.
+Similar to previous optimization comparisons, Recoil makes render optimizations
+through atom dependency. Whereas, with Zustand, it is recommended that you
+manually apply render optimizations by using selectors.
+
+**Zustand**
 
 ```ts
 import create from 'zustand'
@@ -384,9 +435,13 @@ type State = {
   count: number
 }
 
-const useCountStore = create<State>((set) => ({
+type Actions = {
+  setCount: (countCallback: (count: State['count']) => State['count']) => void
+}
+
+const useCountStore = create<State & Actions>((set) => ({
   count: 0,
-  setCount: (countCallback: (count: State['count']) => State['count']) =>
+  setCount: (countCallback) =>
     set((state) => ({ count: countCallback(state.count) })),
 }))
 
@@ -396,6 +451,8 @@ const Component = () => {
   // ...
 }
 ```
+
+**Recoil**
 
 ```ts
 import { atom, useRecoilState } from 'recoil'

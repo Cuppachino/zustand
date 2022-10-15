@@ -14,7 +14,9 @@ export interface StoreApi<T> {
 
 type Get<T, K, F = never> = K extends keyof T ? T[K] : F
 
-export type Mutate<S, Ms> = Ms extends []
+export type Mutate<S, Ms> = number extends Ms['length' & keyof Ms]
+  ? S
+  : Ms extends []
   ? S
   : Ms extends [[infer Mi, infer Ma], ...infer Mrs]
   ? Mutate<StoreMutators<S, Ma>[Mi & StoreMutatorIdentifier], Mrs>
@@ -72,7 +74,7 @@ const createStoreImpl: CreateStoreImpl = (createState) => {
       typeof partial === 'function'
         ? (partial as (state: TState) => TState)(state)
         : partial
-    if (nextState !== state) {
+    if (!Object.is(nextState, state)) {
       const previousState = state
       state =
         replace ?? typeof nextState !== 'object'
